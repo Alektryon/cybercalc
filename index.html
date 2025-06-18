@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cybergothic Gematria Calculator</title>
+    <style>
+        body {
+            background-color: #0a0a0a;
+            color: #00ff00;
+            font-family: 'Courier New', monospace;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        h1 {
+            text-align: center;
+            text-shadow: 0 0 5px #00ff00;
+            letter-spacing: 2px;
+        }
+        
+        h2 {
+            text-align: center;
+            text-shadow: 0 0 3px #00ff00;
+            letter-spacing: 1px;
+        }
+        
+        .container {
+            border: 1px solid #00ff00;
+            padding: 20px;
+            margin-top: 20px;
+            background-color: rgba(0, 0, 0, 0.7);
+            box-shadow: 0 0 10px #00ff00;
+        }
+        
+        textarea {
+            width: 97%;
+            background-color: #111;
+            color: #00ff00;
+            border: 1px solid #00aa00;
+            padding: 10px;
+            font-family: 'Courier New', monospace;
+            resize: vertical;
+            min-height: 200px;
+            margin-bottom: 20px;
+        }
+        
+        .results {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        
+        .cipher-result {
+            border: 1px solid #008800;
+            padding: 10px;
+            background-color: #111;
+        }
+        
+        .cipher-title {
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #00cc00;
+        }
+        
+        .cipher-value {
+            font-size: 24px;
+            text-align: center;
+            margin: 10px 0;
+            color: #00ff00;
+            text-shadow: 0 0 5px #00ff00;
+        }
+        
+        .selected-text {
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #111;
+            border: 1px dashed #008800;
+            color: #00aa00;
+        }
+        
+        .instructions {
+            margin-top: 20px;
+            font-size: 0.9em;
+            color: #008800;
+        }
+    </style>
+</head>
+<body>
+    <h1>Cybergothic Gematria</h1>
+    <h2>Text Selector</h2>
+    <div class="container">
+        <textarea id="textInput" placeholder="Paste or type your text here..."></textarea>
+        
+        <div class="selected-text" id="selectedTextDisplay">
+            No text selected
+        </div>
+        
+        <div class="results">
+            <div class="cipher-result">
+                <div class="cipher-title">English Ordinal</div>
+                <div class="cipher-value" id="ordinalValue">0</div>
+                <div><i>Simple sequence (A=1, Z=26)</i></div>
+            </div>
+            
+            <div class="cipher-result">
+                <div class="cipher-title">English Qaballa</div>
+                <div class="cipher-value" id="eqValue">0</div>
+                <div><i>Cycle of 11 (ALW Cipher)</i></div>
+            </div>
+            
+            <div class="cipher-result">
+                <div class="cipher-title">Alphanumeric Qabbala</div>
+                <div class="cipher-value" id="aqValue">0</div>
+                <div><i>Continuous sequence 0-Z</i></div>
+            </div>
+            
+            <div class="cipher-result">
+                <div class="cipher-title">Synx</div>
+                <div class="cipher-value" id="synxValue">0</div>
+                <div><i>0-Z = 36 divisors of 1260</i></div>
+            </div>
+        </div>
+        
+        <div class="instructions">
+            <p>Instructions: Select any portion of the text to calculate its Gematria values in all four ciphers simultaneously.</p>
+            <p>Note: Numbers are reduced to the sum of their digits, except in the Synx cipher where numbers match 1260's divisors.</p>
+        </div>
+    </div>
+
+    <script>
+        const textInput = document.getElementById('textInput');
+        const selectedTextDisplay = document.getElementById('selectedTextDisplay');
+        const ordinalValue = document.getElementById('ordinalValue');
+        const eqValue = document.getElementById('eqValue');
+        const aqValue = document.getElementById('aqValue');
+        const synxValue = document.getElementById('synxValue');
+        
+        // English Qaballa sequence
+        const eqSequence = "ALWHSDOZKVGRCNYJUFQBMXITEP";
+        
+        // Synx cipher 1260 divisors mapping (0-Z)
+        const synxDivisors = [
+            1, 2, 3, 4, 5, 6, 7, 9, 10, 12,      // 0-9
+            14, 15, 18, 20, 21, 28, 30, 35, 36, 42,    // A-J
+            45, 60, 63, 70, 84, 90, 105, 126, 140, 180,  // K-T
+            210, 252, 315, 420, 630, 1260         // U-Z
+        ];
+        
+        textInput.addEventListener('mouseup', calculateGematria);
+        textInput.addEventListener('keyup', calculateGematria);
+        
+        function calculateGematria() {
+            const selectedText = window.getSelection().toString();
+            
+            if (selectedText.length === 0) {
+                selectedTextDisplay.textContent = "No text selected";
+                ordinalValue.textContent = "0";
+                eqValue.textContent = "0";
+                aqValue.textContent = "0";
+                synxValue.textContent = "0";
+                return;
+            }
+            
+            selectedTextDisplay.textContent = `Selected: "${selectedText}"`;
+            
+            // Calculate values for all ciphers
+            const ordinal = calculateOrdinal(selectedText);
+            const eq = calculateEnglishQaballa(selectedText);
+            const aq = calculateAlphanumericQabbala(selectedText);
+            const synx = calculateSynx(selectedText);
+            
+            // Update the display
+            ordinalValue.textContent = ordinal;
+            eqValue.textContent = eq;
+            aqValue.textContent = aq;
+            synxValue.textContent = synx;
+        }
+        
+        function calculateOrdinal(text) {
+            let sum = 0;
+            
+            for (const char of text.toUpperCase()) {
+                // A-Z: 1-26
+                if (/[A-Z]/.test(char)) {
+                    sum += char.charCodeAt(0) - 'A'.charCodeAt(0) + 1;
+                }
+                // Handle numbers (sum digits)
+                else if (/\d/.test(char)) {
+                    sum += sumDigits(parseInt(char));
+                }
+            }
+            
+            return sum;
+        }
+        
+        function calculateEnglishQaballa(text) {
+            let sum = 0;
+            
+            for (const char of text.toUpperCase()) {
+                // Check if character is in the EQ sequence
+                const index = eqSequence.indexOf(char);
+                if (index !== -1) {
+                    sum += index + 1;
+                }
+                // Handle numbers (sum digits)
+                else if (/\d/.test(char)) {
+                    sum += sumDigits(parseInt(char));
+                }
+            }
+            
+            return sum;
+        }
+        
+        function calculateAlphanumericQabbala(text) {
+            let sum = 0;
+            
+            for (const char of text.toUpperCase()) {
+                // 0-9: 0-9
+                if (/\d/.test(char)) {
+                    sum += sumDigits(parseInt(char));
+                }
+                // A-Z: 10-35
+                else if (/[A-Z]/.test(char)) {
+                    sum += char.charCodeAt(0) - 'A'.charCodeAt(0) + 10;
+                }
+            }
+            
+            return sum;
+        }
+        
+        function calculateSynx(text) {
+            let sum = 0;
+            
+            for (const char of text.toUpperCase()) {
+                const code = char.charCodeAt(0);
+                
+                // 0-9
+                if (code >= 48 && code <= 57) {
+                    sum += synxDivisors[code - 48];
+                }
+                // A-Z
+                else if (code >= 65 && code <= 90) {
+                    sum += synxDivisors[code - 65 + 10];
+                }
+            }
+            
+            return sum;
+        }
+        
+        function sumDigits(number) {
+            let sum = 0;
+            while (number) {
+                sum += number % 10;
+                number = Math.floor(number / 10);
+            }
+            return sum;
+        }
+    </script>
+</body>
+</html>
