@@ -121,6 +121,19 @@
                 <div class="cipher-value" id="synxValue">0</div>
                 <div><i>0-Z = 36 divisors of 1260</i></div>
             </div>
+
+            <div class="cipher-result">
+                <div class="cipher-title">Angelic Gematria</div>
+                <div class="cipher-value" id="angelicValue">0</div>
+                <div><i>Custom ordinal (A=5, Z=30)</i></div>
+            </div>
+            
+            <div class="cipher-result">
+                <div class="cipher-title">Satanic Gematria</div>
+                <div class="cipher-value" id="satanicValue">0</div>
+                <div><i>Custom ordinal (A=36, Z=61)</i></div>
+            </div>
+            
         </div>
         
         <div class="instructions">
@@ -136,6 +149,8 @@
         const eqValue = document.getElementById('eqValue');
         const aqValue = document.getElementById('aqValue');
         const synxValue = document.getElementById('synxValue');
+        const angelicValue = document.getElementById('angelicValue');
+        const satanicValue = document.getElementById('satanicValue');
         
         // English Qaballa sequence
         const eqSequence = "ALWHSDOZKVGRCNYJUFQBMXITEP";
@@ -160,6 +175,8 @@
                 eqValue.textContent = "0";
                 aqValue.textContent = "0";
                 synxValue.textContent = "0";
+                angelicValue.textContent = "0";
+                satanicValue.textContent = "0";
                 return;
             }
             
@@ -170,12 +187,16 @@
             const eq = calculateEnglishQaballa(selectedText);
             const aq = calculateAlphanumericQabbala(selectedText);
             const synx = calculateSynx(selectedText);
+            const angelic = calculateAngelicGematria(selectedText);
+            const satanic = calculateSatanicGematria(selectedText);
             
             // Update the display
             ordinalValue.textContent = ordinal;
             eqValue.textContent = eq;
             aqValue.textContent = aq;
             synxValue.textContent = synx;
+            angelicValue.textContent = angelic;
+            satanicValue.textContent = satanic;
         }
         
         function calculateOrdinal(text) {
@@ -243,6 +264,40 @@
                 // A-Z
                 else if (code >= 65 && code <= 90) {
                     sum += synxDivisors[code - 65 + 10];
+                }
+            }
+            
+            return sum;
+        }
+        
+        function calculateAngelicGematria(text) {
+            let sum = 0;
+            
+            for (const char of text.toUpperCase()) {
+                // A-Z: 5-30
+                if (/[A-Z]/.test(char)) {
+                    sum += char.charCodeAt(0) - 'A'.charCodeAt(0) + 5;
+                }
+                // Handle numbers (sum digits)
+                else if (/\d/.test(char)) {
+                    sum += sumDigits(parseInt(char));
+                }
+            }
+            
+            return sum;
+        }
+        
+        function calculateSatanicGematria(text) {
+            let sum = 0;
+            
+            for (const char of text.toUpperCase()) {
+                // A-Z: 36-61
+                if (/[A-Z]/.test(char)) {
+                    sum += char.charCodeAt(0) - 'A'.charCodeAt(0) + 36;
+                }
+                // Handle numbers (sum digits)
+                else if (/\d/.test(char)) {
+                    sum += sumDigits(parseInt(char));
                 }
             }
             
