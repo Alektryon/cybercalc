@@ -1,3 +1,3 @@
 # Cybergothic Gematria
 
-Made with [Ninja AI](https://myninja.ai/).
+Text selector made with [Ninja AI](https://myninja.ai/).
